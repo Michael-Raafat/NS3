@@ -35,29 +35,48 @@ int main (int argc, char *argv[]) {
   LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
   NodeContainer nodes;
   Ptr<Node> nodesP[DEVICE_NUMBER];
+  vector<Ipv4Address> nodesIP[DEVICE_NUMBER];
   nodes.Create (DEVICE_NUMBER);
   for (uint32_t i = 0; i < nodes.GetN(); i++) {
   	nodesP[i] = nodes.Get(i);
+    nodesIP[i] = vector<Ipv4Address>();
   }
   
   vector<NetDeviceContainer> devices;  
+
+  cout << "---------------------------------------------------------------------------------" << endl;
   for (uint32_t i = 0; i < CONNECTION_NUMBER; i++) {
     NetDeviceContainer device = makeP2Pconnection(connections[i][0], connections[i][1], nodesP);
     devices.push_back(device);
     nodesP[connections[i][0]]->AddDevice(device.Get(0));
     nodesP[connections[i][1]]->AddDevice(device.Get(1));
   }
-  
+  cout << "---------------------------------------------------------------------------------" << endl;
+
   InternetStackHelper stack;
   stack.Install (nodes);
-
   Ipv4AddressHelper address;
   Ipv4InterfaceContainer interfaces;
-  for (uint32_t i = 0; i < devices.size(); i++) {
-    address.SetBase (string("10.1." + to_string(i + 1) + ".0").c_str(), "255.255.255.0");
-    Ipv4InterfaceContainer interface = address.Assign(devices[i]);
+  for (uint32_t in = 0; in < devices.size(); in++) {
+    string net_domain = string("10.1." + to_string(in + 1) + ".0");
+    address.SetBase (net_domain.c_str(), "255.255.255.0");
+    int i = devices[in].Get(0)->GetNode()->GetId();
+    int j = devices[in].Get(1)->GetNode()->GetId();
+    cout << net_domain << " assigned to Point-to-point connection between " << i << " and " << j << endl;
+    Ipv4InterfaceContainer interface = address.Assign(devices[in]);
     interfaces.Add(interface);
+    nodesIP[i].push_back(interface.GetAddress(0));
+    nodesIP[j].push_back(interface.GetAddress(1));
   }
+  cout << "---------------------------------------------------------------------------------" << endl;
+  cout << "Devices and IP's" << endl;
+  for (uint32_t i = 0; i < nodes.GetN(); i++) {
+    cout << "\tNode " << i << " : " << endl;
+    for (uint32_t j = 0; (j + 1) < nodesIP[i].size(); j++) {
+      cout << "\t\tInterface " << j << " : " << nodesIP[i][j] << endl;
+    }
+  }
+  cout << "---------------------------------------------------------------------------------" << endl;
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   OutputStreamWrapper wrapper = OutputStreamWrapper(&std::cout);
   interfaces.Get(0).first->GetRoutingProtocol()->PrintRoutingTable(&wrapper, Time::NS);
