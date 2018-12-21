@@ -16,13 +16,16 @@
 
 using namespace ns3;
 using namespace std;
-
+/*
 #define CONNECTION_NUMBER 8
 static const int connections[][2] = {
   {0, 1}, {0, 2}, {1, 2}, {1, 3}, {1, 4}, {2, 4}, {3, 4}, {4, 5}
 };
-
-
+*/
+#define CONNECTION_NUMBER 6
+static const int connections[][2] = {
+  {0, 1}, {0, 4}, {1, 2}, {2, 3}, {3, 5}, {4, 5}
+};
 NS_LOG_COMPONENT_DEFINE ("Our topology");
 
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node>[]);
@@ -39,10 +42,12 @@ int main (int argc, char *argv[]) {
   NodeContainer nodes;
   Ptr<Node> nodesP[DEVICE_NUMBER];
   vector<Ipv4Address> nodesIP[DEVICE_NUMBER];
+  vector<uint32_t> nodesInter[DEVICE_NUMBER];
   nodes.Create (DEVICE_NUMBER);
   for (uint32_t i = 0; i < nodes.GetN(); i++) {
   	nodesP[i] = nodes.Get(i);
     nodesIP[i] = vector<Ipv4Address>();
+    nodesInter[i] = vector<uint32_t>();
   }
 
   vector<NetDeviceContainer> devices;
@@ -72,18 +77,21 @@ int main (int argc, char *argv[]) {
     interfaces.Add(interface);
     nodesIP[i].push_back(interface.GetAddress(0));
     nodesIP[j].push_back(interface.GetAddress(1));
+    nodesInter[i].push_back(interface.Get(0).second);
+    nodesInter[j].push_back(interface.Get(1).second);
   }
   cout << "---------------------------------------------------------------------------------" << endl;
   cout << "Devices and IP's" << endl;
   for (uint32_t i = 0; i < nodes.GetN(); i++) {
     cout << "\tNode " << i << " : " << endl;
     for (uint32_t j = 0; (j) < nodesIP[i].size(); j++) {
-      cout << "\t\tInterface " << j << " : " << nodesIP[i][j] << endl;
+      cout << "\t\tInterface " << nodesInter[i][j] << " : " << nodesIP[i][j] << endl;
     }
   }
   cout << "---------------------------------------------------------------------------------" << endl;
   
   // Establish Routes and print them.
+  sstream 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   OutputStreamWrapper wrapper = OutputStreamWrapper(&std::cout);
   Ipv4GlobalRoutingHelper::PrintRoutingTableAllAt(Time(), &wrapper, Time::NS);
@@ -96,7 +104,7 @@ int main (int argc, char *argv[]) {
   serverApps.Start (Seconds (1.0));
   serverApps.Stop (Seconds (10.0));
 
-  UdpEchoClientHelper echoClient (interfaces.GetAddress (15), 9);
+  UdpEchoClientHelper echoClient (interfaces.GetAddress (interfaces.GetN() - 1), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
