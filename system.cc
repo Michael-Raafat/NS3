@@ -34,6 +34,8 @@ int main (int argc, char *argv[]) {
   Time::SetResolution (Time::NS);
   LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
   LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
+
+  // Construct basic toplogy.
   NodeContainer nodes;
   Ptr<Node> nodesP[DEVICE_NUMBER];
   vector<Ipv4Address> nodesIP[DEVICE_NUMBER];
@@ -54,6 +56,8 @@ int main (int argc, char *argv[]) {
   }
   cout << "---------------------------------------------------------------------------------" << endl;
 
+
+  // Construct Network Layer.
   InternetStackHelper stack;
   stack.Install (nodes);
   Ipv4AddressHelper address;
@@ -78,9 +82,14 @@ int main (int argc, char *argv[]) {
     }
   }
   cout << "---------------------------------------------------------------------------------" << endl;
+  
+  // Establish Routes and print them.
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   OutputStreamWrapper wrapper = OutputStreamWrapper(&std::cout);
-  interfaces.Get(0).first->GetRoutingProtocol()->PrintRoutingTable(&wrapper, Time::NS);
+  Ipv4GlobalRoutingHelper::PrintRoutingTableAllAt(Time(), &wrapper, Time::NS);
+
+
+  // Application layer to test topology.
   UdpEchoServerHelper echoServer (9);
 
   ApplicationContainer serverApps = echoServer.Install (nodes.Get (5));
@@ -95,6 +104,9 @@ int main (int argc, char *argv[]) {
   ApplicationContainer clientApps = echoClient.Install (nodes.Get (0));
   clientApps.Start (Seconds (2.0));
   clientApps.Stop (Seconds (10.0));
+
+
+  // Animation to see in gui our system.
   AnimationInterface anim ("system.xml");
   anim.SetConstantPosition (nodes.Get(0), 0.0, 10.0);
   anim.SetConstantPosition (nodes.Get(1), 20.0, 20.0);
@@ -102,6 +114,7 @@ int main (int argc, char *argv[]) {
   anim.SetConstantPosition (nodes.Get(3), 30.0, 20.0);
   anim.SetConstantPosition (nodes.Get(4), 30.0, 0.0);
   anim.SetConstantPosition (nodes.Get(5), 40.0, 0.0);
+  cout << "---------------------------------------------------------------------------------" << endl;
   Simulator::Run ();
   Simulator::Destroy ();
   return 0;
