@@ -5,6 +5,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/global-route-manager.h"
 #include "ns3/ipv4-global-routing-helper.h"
+#include "ns3/netanim-module.h"
 
 #include <iostream>
 #include <vector>
@@ -25,11 +26,11 @@ static const int connections[][2] = {
 NS_LOG_COMPONENT_DEFINE ("Our topology");
 
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node>[]);
-
+void setAnimation(Ptr<Node> nodes);
 int main (int argc, char *argv[]) {
   CommandLine cmd;
   cmd.Parse (argc, argv);
-  
+
   Time::SetResolution (Time::NS);
   LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
   LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
@@ -41,8 +42,8 @@ int main (int argc, char *argv[]) {
   	nodesP[i] = nodes.Get(i);
     nodesIP[i] = vector<Ipv4Address>();
   }
-  
-  vector<NetDeviceContainer> devices;  
+
+  vector<NetDeviceContainer> devices;
 
   cout << "---------------------------------------------------------------------------------" << endl;
   for (uint32_t i = 0; i < CONNECTION_NUMBER; i++) {
@@ -72,7 +73,7 @@ int main (int argc, char *argv[]) {
   cout << "Devices and IP's" << endl;
   for (uint32_t i = 0; i < nodes.GetN(); i++) {
     cout << "\tNode " << i << " : " << endl;
-    for (uint32_t j = 0; (j + 1) < nodesIP[i].size(); j++) {
+    for (uint32_t j = 0; (j) < nodesIP[i].size(); j++) {
       cout << "\t\tInterface " << j << " : " << nodesIP[i][j] << endl;
     }
   }
@@ -82,11 +83,11 @@ int main (int argc, char *argv[]) {
   interfaces.Get(0).first->GetRoutingProtocol()->PrintRoutingTable(&wrapper, Time::NS);
   UdpEchoServerHelper echoServer (9);
 
-  ApplicationContainer serverApps = echoServer.Install (nodes.Get (1));
+  ApplicationContainer serverApps = echoServer.Install (nodes.Get (5));
   serverApps.Start (Seconds (1.0));
   serverApps.Stop (Seconds (10.0));
 
-  UdpEchoClientHelper echoClient (interfaces.GetAddress (1), 9);
+  UdpEchoClientHelper echoClient (interfaces.GetAddress (15), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
@@ -94,12 +95,20 @@ int main (int argc, char *argv[]) {
   ApplicationContainer clientApps = echoClient.Install (nodes.Get (0));
   clientApps.Start (Seconds (2.0));
   clientApps.Stop (Seconds (10.0));
-
+  AnimationInterface anim ("system.xml");
+  anim.SetConstantPosition (nodes.Get(0), 0.0, 10.0);
+  anim.SetConstantPosition (nodes.Get(1), 20.0, 20.0);
+  anim.SetConstantPosition (nodes.Get(2), 20.0, 0.0);
+  anim.SetConstantPosition (nodes.Get(3), 30.0, 20.0);
+  anim.SetConstantPosition (nodes.Get(4), 30.0, 0.0);
+  anim.SetConstantPosition (nodes.Get(5), 40.0, 0.0);
   Simulator::Run ();
   Simulator::Destroy ();
   return 0;
 }
+void setAnimation(Ptr<Node> nodes){
 
+}
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node> ptrs[]) {
 	NodeContainer e = NodeContainer();
 	e.Add(ptrs[i]);
