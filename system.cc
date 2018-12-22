@@ -16,16 +16,17 @@
 
 using namespace ns3;
 using namespace std;
-/*
+
 #define CONNECTION_NUMBER 8
 static const int connections[][2] = {
   {0, 1}, {0, 2}, {1, 2}, {1, 3}, {1, 4}, {2, 4}, {3, 4}, {4, 5}
 };
-*/
+/*
 #define CONNECTION_NUMBER 6
 static const int connections[][2] = {
   {0, 1}, {0, 4}, {1, 2}, {2, 3}, {3, 5}, {4, 5}
 };
+*/
 NS_LOG_COMPONENT_DEFINE ("Our topology");
 
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node>[]);
@@ -37,7 +38,7 @@ int main (int argc, char *argv[]) {
   Time::SetResolution (Time::NS);
   LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
   LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
-
+  //LogComponentEnable("GlobalRouteManagerImpl", LOG_LEVEL_LOGIC);
   // Construct basic toplogy.
   NodeContainer nodes;
   Ptr<Node> nodesP[DEVICE_NUMBER];
@@ -97,6 +98,7 @@ int main (int argc, char *argv[]) {
   cout << "---------------------------------------------------------------------------------" << endl;
 
   // Establish Routes and print them.
+  cout << "SPF trees : " << endl;
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   OutputStreamWrapper wrapper = OutputStreamWrapper(&std::cout);
   Ipv4GlobalRoutingHelper::PrintRoutingTableAllAt(Time(), &wrapper, Time::NS);

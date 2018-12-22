@@ -917,21 +917,21 @@ GlobalRouteManagerImpl::SPFNext (SPFVertex* v, CandidateQueue& candidate)
 //
 // This path is one with an equal cost.
 //
-              NS_LOG_LOGIC ("Equal cost multiple paths found.");
+//               NS_LOG_LOGIC ("Equal cost multiple paths found.");
 
-// At this point, there are two instances 'w' and 'cw' of the
-// same vertex, the vertex that is currently being considered
-// for adding into the shortest path tree. 'w' is the instance
-// as seen from the root via vertex 'v', and 'cw' is the instance 
-// as seen from the root via some other vertices other than 'v'.
-// These two instances are being merged in the following code.
-// In particular, the parent nodes, the next hops, and the root's
-// output interfaces of the two instances are being merged.
-// 
-// Note that this is functionally equivalent to calling
-// ospf_nexthop_merge (cw->nexthop, w->nexthop) in quagga-0.98.6
-// (ospf_spf.c::859), although the detail implementation
-// is very different from quagga (blame ns3::GlobalRouteManagerImpl)
+// // At this point, there are two instances 'w' and 'cw' of the
+// // same vertex, the vertex that is currently being considered
+// // for adding into the shortest path tree. 'w' is the instance
+// // as seen from the root via vertex 'v', and 'cw' is the instance 
+// // as seen from the root via some other vertices other than 'v'.
+// // These two instances are being merged in the following code.
+// // In particular, the parent nodes, the next hops, and the root's
+// // output interfaces of the two instances are being merged.
+// // 
+// // Note that this is functionally equivalent to calling
+// // ospf_nexthop_merge (cw->nexthop, w->nexthop) in quagga-0.98.6
+// // (ospf_spf.c::859), although the detail implementation
+// // is very different from quagga (blame ns3::GlobalRouteManagerImpl)
 
 // prepare vertex w
               w = new SPFVertex (w_lsa);
