@@ -742,7 +742,7 @@ GlobalRouteManagerImpl::InitializeRoutes ()
 // We examine the links in v's LSA and update the list of candidates with any
 // vertices not already on the list.  If a lower-cost path is found to a
 // vertex already on the candidate list, store the new (lower) cost.
-// Delete the Rest
+//
 void
 GlobalRouteManagerImpl::SPFNext (SPFVertex* v, CandidateQueue& candidate)
 {
@@ -917,7 +917,7 @@ GlobalRouteManagerImpl::SPFNext (SPFVertex* v, CandidateQueue& candidate)
 //
 // This path is one with an equal cost.
 //
-        // NS_LOG_LOGIC ("Equal cost multiple paths found.");
+              NS_LOG_LOGIC ("Equal cost multiple paths found.");
 
 // At this point, there are two instances 'w' and 'cw' of the
 // same vertex, the vertex that is currently being considered
@@ -934,16 +934,15 @@ GlobalRouteManagerImpl::SPFNext (SPFVertex* v, CandidateQueue& candidate)
 // is very different from quagga (blame ns3::GlobalRouteManagerImpl)
 
 // prepare vertex w
-//              w = new SPFVertex (w_lsa);
-//              SPFNexthopCalculation (v, w, l, distance);
-//              cw->MergeRootExitDirections (w);
-//              cw->MergeParent (w);
+              w = new SPFVertex (w_lsa);
+              SPFNexthopCalculation (v, w, l, distance);
+              cw->MergeRootExitDirections (w);
+              cw->MergeParent (w);
 // SPFVertexAddParent (w) is necessary as the destructor of 
 // SPFVertex checks if the vertex and its parent is linked
 // bidirectionally
-//              SPFVertexAddParent (w);
-//             delete w;
-               return;
+              SPFVertexAddParent (w);
+              delete w;
             }
           else // cw->GetDistanceFromRoot () > w->GetDistanceFromRoot ()
             {
@@ -1338,6 +1337,31 @@ GlobalRouteManagerImpl::CheckForStubNode (Ipv4Address root)
   return false;
 }
 
+#include <string>
+#include <sstream> 
+
+void printSPFTree(SPFVertex *v, std::string s) {
+  if (v == nullptr) {
+    std::cout << s << std::endl;
+    return;
+  }
+  uint32_t n_c = v->GetNChildren();
+  std::ostringstream vertId;
+  v->GetVertexId().Print(vertId);
+  if (s != "") {
+    s += " --> " + vertId.str();
+  } else {
+    s = vertId.str();
+  }
+  if (n_c == 0) {
+    std::cout << s << std::endl;
+  } else {
+    for (uint32_t i = 0; i < n_c; i++) {
+      printSPFTree(v->GetChild(i), s);
+    }
+  }
+}
+
 // quagga ospf_spf_calculate
 void
 GlobalRouteManagerImpl::SPFCalculate (Ipv4Address root)
@@ -1378,12 +1402,12 @@ GlobalRouteManagerImpl::SPFCalculate (Ipv4Address root)
 // reached.  Instead, short-circuit this computation and just install
 // a default route in the CheckForStubNode() method.
 //
-//  if (NodeList::GetNNodes () > 0 && CheckForStubNode (root))
-//    {
-//      NS_LOG_LOGIC ("SPFCalculate truncated for stub node " << root);
-//      delete m_spfroot;
-//      return;
-//    }
+  if (NodeList::GetNNodes () > 0 && CheckForStubNode (root))
+    {
+      NS_LOG_LOGIC ("SPFCalculate truncated for stub node " << root);
+      delete m_spfroot;
+      return;
+    }
 
   for (;;)
     {
@@ -1495,6 +1519,11 @@ GlobalRouteManagerImpl::SPFCalculate (Ipv4Address root)
       NS_LOG_LOGIC ("Processing External LSA with id " << extlsa->GetLinkStateId ());
       ProcessASExternals (m_spfroot, extlsa);
     }
+// Print SPF tree.
+ std::cout << "--------------------------------------------------------------" << std::endl;
+ std::cout << "Root at " << root << std::endl;
+ printSPFTree(m_spfroot, std::string(""));
+ std::cout << "--------------------------------------------------------------" << std::endl;
 
 //
 // We're all done setting the routing information for the node at the root of

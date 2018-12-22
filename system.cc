@@ -89,9 +89,14 @@ int main (int argc, char *argv[]) {
     }
   }
   cout << "---------------------------------------------------------------------------------" << endl;
-  
+  for (uint32_t i = 0; i < nodes.GetN(); i++) {
+  	Ptr<GlobalRouter> rtr = 
+        nodesP[i]->GetObject<GlobalRouter> ();
+  	cout << "Node " << i << " has router ip of " << rtr->GetRouterId () << endl;
+  }
+  cout << "---------------------------------------------------------------------------------" << endl;
+
   // Establish Routes and print them.
-  sstream 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   OutputStreamWrapper wrapper = OutputStreamWrapper(&std::cout);
   Ipv4GlobalRoutingHelper::PrintRoutingTableAllAt(Time(), &wrapper, Time::NS);
