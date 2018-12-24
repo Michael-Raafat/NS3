@@ -30,7 +30,7 @@ static const int connections[][2] = {
 NS_LOG_COMPONENT_DEFINE ("Our topology");
 
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node>[]);
-void setAnimation(Ptr<Node> nodes);
+
 int main (int argc, char *argv[]) {
   CommandLine cmd;
   cmd.Parse (argc, argv);
@@ -91,7 +91,7 @@ int main (int argc, char *argv[]) {
   }
   cout << "---------------------------------------------------------------------------------" << endl;
   for (uint32_t i = 0; i < nodes.GetN(); i++) {
-  	Ptr<GlobalRouter> rtr = 
+  	Ptr<GlobalRouter> rtr =
         nodesP[i]->GetObject<GlobalRouter> ();
   	cout << "Node " << i << " has router ip of " << rtr->GetRouterId () << endl;
   }
@@ -134,9 +134,7 @@ int main (int argc, char *argv[]) {
   Simulator::Destroy ();
   return 0;
 }
-void setAnimation(Ptr<Node> nodes){
 
-}
 NetDeviceContainer makeP2Pconnection(int i, int j, Ptr<Node> ptrs[]) {
 	NodeContainer e = NodeContainer();
 	e.Add(ptrs[i]);
