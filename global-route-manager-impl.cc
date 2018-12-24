@@ -905,7 +905,7 @@ GlobalRouteManagerImpl::SPFNext (SPFVertex* v, CandidateQueue& candidate)
 */
           SPFVertex* cw;
           cw = candidate.Find (w_lsa->GetLinkStateId ());
-          if (cw->GetDistanceFromRoot () < distance)
+          if (cw->GetDistanceFromRoot () <= distance)
             {
 //
 // This is not a shorter path, so don't do anything.
